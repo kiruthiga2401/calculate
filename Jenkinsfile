@@ -2,16 +2,15 @@ pipeline {
     agent any
     
     environment {
-        // Unga Docker Hub username matrum Image name-a inge maathunggal
-        DOCKER_HUB_USER = 'your_dockerhub_username'
+        // ⚠️ Inga unoda real Docker Hub username-ai podu (e.g., 'kiruthigakanagaraj')
+        DOCKER_HUB_USER = 'kiruthigakanagaraj'
         IMAGE_NAME      = 'simple-calc'
-        IMAGE_TAG       = "${BUILD_NUMBER}" // Jenkins build number-a tag-a vechikrom
+        IMAGE_TAG       = "${BUILD_NUMBER}"
     }
     
     stages {
         stage('Checkout Code') {
             steps {
-                // Git repo-vil irundhu code-a edukum
                 checkout scm
             }
         }
@@ -20,9 +19,8 @@ pipeline {
             steps {
                 echo 'Building Docker Image...'
                 script {
-                    // Dockerfile vechu image build pannudhu
-                    sh "docker build -t ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} ."
-                    sh "docker build -t ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest ."
+                    sh "docker build -t ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG} ."
+                    sh "docker build -t ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:latest ."
                 }
             }
         }
@@ -30,11 +28,12 @@ pipeline {
         stage('Push to Docker Registry') {
             steps {
                 echo 'Pushing Image to Docker Hub...'
-                // Jenkins Credentials Manager-la 'docker-hub-credentials' nu ID vechu user/pass save panni irukanum
+                // Jenkins credentials ID 'docker-hub-credentials' nnu correct-ah irukkanum
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_HUB_PASSWORD', usernameVariable: 'DOCKER_HUB_USERNAME')]) {
-                    sh "echo \$DOCKER_HUB_PASSWORD | docker login -u \$DOCKER_HUB_USERNAME --password-stdin"
-                    sh "docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
-                    sh "docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest"
+                    // Fix: Fixed variable mapping syntax so it uses the actual credential username
+                    sh "echo '${env.DOCKER_HUB_PASSWORD}' | docker login -u '${env.DOCKER_HUB_USERNAME}' --password-stdin"
+                    sh "docker push ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG}"
+                    sh "docker push ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:latest"
                 }
             }
         }
@@ -43,9 +42,8 @@ pipeline {
     post {
         always {
             echo 'Cleaning up local images...'
-            // Server tools space consume aagama iruka local storage build images-a remove pannidhum
-            sh "docker rmi ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} || true"
-            sh "docker rmi ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest || true"
+            sh "docker rmi ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG} || true"
+            sh "docker rmi ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:latest || true"
         }
     }
 }
