@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        // ⚠️ Inga unoda real Docker Hub username-ai podu (e.g., 'kiruthigakanagaraj')
+        // Unoda Docker Hub username-ai inge podu
         DOCKER_HUB_USER = 'kiruthigakanagaraj'
         IMAGE_NAME      = 'simple-calc'
         IMAGE_TAG       = "${BUILD_NUMBER}"
@@ -28,12 +28,13 @@ pipeline {
         stage('Push to Docker Registry') {
             steps {
                 echo 'Pushing Image to Docker Hub...'
-                // Jenkins credentials ID 'docker-hub-credentials' nnu correct-ah irukkanum
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_HUB_PASSWORD', usernameVariable: 'DOCKER_HUB_USERNAME')]) {
-                    // Fix: Fixed variable mapping syntax so it uses the actual credential username
-                    sh "echo '${env.DOCKER_HUB_PASSWORD}' | docker login -u '${env.DOCKER_HUB_USERNAME}' --password-stdin"
-                    sh "docker push ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG}"
-                    sh "docker push ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:latest"
+                    // FIXED: Double quotes use pannirukken, so variables values correct-ah pass aagum
+                    sh """
+                        echo "${env.DOCKER_HUB_PASSWORD}" | docker login -u "${env.DOCKER_HUB_USERNAME}" --password-stdin
+                        docker push ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG}
+                        docker push ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:latest
+                    """
                 }
             }
         }
