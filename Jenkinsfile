@@ -51,9 +51,10 @@ pipeline {
                     sh "docker stop ${env.IMAGE_NAME} || true"
                     sh "docker rm ${env.IMAGE_NAME} || true"
                     
-                    // Puthiya image-ah pull panni, local port 5000-la run panrom (App port-ku etra mathiri change panniko, eg: 80, 5000)
+                    // Puthiya image-ah pull panni, local port 6000-la run panrom (Port mapping: 6000 -> 5000)
                     sh "docker run -d --name ${env.IMAGE_NAME} -p 6000:5000 ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:latest"
-            }
-        }
-    }
-}
+                }  // <--- Intha bracket missing-ah irunthuchu (script block-ku)
+            }      // <--- Intha bracket-um venum (steps block-ku)
+        }          // <--- Intha bracket-um venum (stage block-ku)
+    }              // <--- Intha bracket-um venum (stages block-ku)
+}                  // <--- Intha bracket-um venum (pipeline block-ku)
