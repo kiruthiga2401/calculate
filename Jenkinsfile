@@ -52,7 +52,7 @@ pipeline {
                     sh "docker rm ${env.IMAGE_NAME} || true"
                     
                     // Puthiya image-ah pull panni, local port 6000-la run panrom (Port mapping: 6000 -> 5000)
-                    sh "docker run -d --name ${env.IMAGE_NAME} -p 6000:5000 ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:latest"
+                    sh "docker run -d --name ${env.IMAGE_NAME} -p 5000:5000 ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:latest"
                 }  // <--- Intha bracket missing-ah irunthuchu (script block-ku)
             }      // <--- Intha bracket-um venum (steps block-ku)
         }          // <--- Intha bracket-um venum (stage block-ku)
