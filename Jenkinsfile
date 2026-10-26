@@ -53,7 +53,6 @@ pipeline {
                     
                     // Puthiya image-ah pull panni, local port 5000-la run panrom (App port-ku etra mathiri change panniko, eg: 80, 5000)
                     sh "docker run -d --name ${env.IMAGE_NAME} -p 6000:5000 ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:latest"
-                }
             }
         }
     }
