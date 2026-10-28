@@ -5,8 +5,8 @@ pipeline {
         DOCKER_HUB_USER = 'kiruthigakanagaraj'
         IMAGE_NAME      = 'simple-calc'
         IMAGE_TAG       = "${BUILD_NUMBER}"
-        // Jenkins Credentials la unoda Docker Hub username & password-ku 
-        // ID ah 'docker-hub-credentials' nu kuduthurunu check panniko
+        // Jenkins Credentials-ல உங்க Docker Hub username & password-க்கு 
+        // ID ah 'docker-hub-credentials' nu கொடுத்திருக்கீங்களான்னு செக் பண்ணிக்கோங்க
         DOCKER_CREDS    = 'docker-hub-credentials'
     }
     
@@ -27,11 +27,11 @@ pipeline {
             }
         }
         
-        stage('Push to Docker Hub') {
+        Stage('Push to Docker Hub') {
             steps {
                 echo 'Pushing Docker Image to Docker Hub...'
                 script {
-                    // Jenkins Credentials use panni login panrom
+                    // Jenkins Credentials யூஸ் பண்ணி login பண்றோம்
                     withCredentials([usernamePassword(credentialsId: "${env.DOCKER_CREDS}", 
                                                      usernameVariable: 'DOCKER_USER', 
                                                      passwordVariable: 'DOCKER_PASS')]) {
@@ -47,12 +47,22 @@ pipeline {
             steps {
                 echo 'Deploying Container...'
                 script {
-                    // Munadi run aana old container iruntha athula stop/remove panrom (Port conflict varama irukka)
-                    sh "docker stop ${env.IMAGE_NAME} || true"
-                    sh "docker rm ${env.IMAGE_NAME} || true"
+                    // Branch-க்கு தகுந்த மாதிரி Port நிர்ணயம்
+                    def hostPort = 5000
+                    if (env.BRANCH_NAME == 'production') {
+                        hostPort = 6000
+                    }
+
+                    def containerName = "${env.IMAGE_NAME}-${env.BRANCH_NAME}"
+
+                    // பழைய container இருந்தால் நிறுத்தி நீக்குவது
+                    sh "docker stop ${containerName} || true"
+                    sh "docker rm ${containerName} || true"
+
+                    // புதிய container-ஐ சரியான Port-ல் Run செய்வது
+                    sh "docker run -d --name ${containerName} -p ${hostPort}:5000 ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG}"
                     
-                    // Puthiya image-ah pull panni, local port 5000-la run panrom (App port-ku etra mathiri change panniko, eg: 80, 5000)
-                    sh "docker run -d --name ${env.IMAGE_NAME} -p 6000:5000 ${env.DOCKER_HUB_USER}/${env.IMAGE_NAME}:latest"
+                    echo "Successfully deployed ${env.BRANCH_NAME} on port ${hostPort}"
                 }
             }
         }
